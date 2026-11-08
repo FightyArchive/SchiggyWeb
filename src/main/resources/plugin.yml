@@ -1,0 +1,19 @@
+name: SchiggyWeb
+version: 1.0.0
+main: de.schiggy.web.SchiggyWeb
+api-version: '1.21'
+author: FightyFinn
+
+commands:
+  website:
+    description: Verknüpft deinen Minecraft-Account mit der Website
+    usage: /website verify <Code>
+
+permissions:
+  schiggyweb.use:
+    description: Erlaubt die Nutzung von SchiggyWeb
+    default: true
+
+  schiggyweb.admin:
+    description: Zugriff auf die SchiggyWeb-Verwaltung
+    default: op
