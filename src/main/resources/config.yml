@@ -1,0 +1,32 @@
+# SchiggyWeb Configuration
+
+general:
+  debug: false
+
+website:
+  url: "https://schiggysmp.de"
+
+api:
+  enabled: true
+  host: "127.0.0.1"
+  port: 8765
+
+  security:
+    require-token: true
+    token: "CHANGE-ME-TO-A-LONG-RANDOM-SECRET"
+
+authentication:
+  verification:
+    code-length: 6
+    expiration-seconds: 300
+
+database:
+  type: "sqlite"
+  file: "database.db"
+
+features:
+  player-profiles: true
+  leaderboards: true
+  tickets: true
+  news: true
+  giveaways: true
