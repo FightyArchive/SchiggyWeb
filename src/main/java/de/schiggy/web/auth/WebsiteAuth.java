@@ -1,3 +1,4 @@
+
 package de.schiggy.web.auth;
 
 import java.util.UUID;
@@ -21,6 +22,6 @@ public class WebsiteAuth {
     }
 
     public boolean isVerified(UUID playerUuid) {
-        return authManager.getSessionForPlayer(playerUuid) != null;
+        return verificationService.isLinked(playerUuid);
     }
 }
