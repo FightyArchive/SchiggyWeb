@@ -14,19 +14,28 @@ public class VerificationService {
     private final Map<String, VerificationSession> sessions =
             new ConcurrentHashMap<>();
 
+    private final Map<UUID, WebAccount> linkedAccounts =
+            new ConcurrentHashMap<>();
+
     public VerificationSession createVerification(String playerName) {
         if (playerName == null || playerName.isBlank()) {
             throw new IllegalArgumentException("Spielername darf nicht leer sein.");
         }
 
-        String code = generateCode();
+        String code;
+
+        do {
+            code = String.format("%06d", random.nextInt(1_000_000));
+        } while (sessions.containsKey(code));
+
+        long now = System.currentTimeMillis();
 
         VerificationSession session = new VerificationSession(
                 code,
                 playerName,
                 null,
-                System.currentTimeMillis(),
-                System.currentTimeMillis() + CODE_LIFETIME
+                now,
+                now + CODE_LIFETIME
         );
 
         sessions.put(code, session);
@@ -45,14 +54,18 @@ public class VerificationService {
         }
 
         if (System.currentTimeMillis() > session.expiresAt()) {
-            sessions.remove(code);
+            sessions.remove(code, session);
             return null;
         }
 
         return session;
     }
 
-    public boolean completeVerification(String code, UUID playerUuid, String playerName) {
+    public boolean completeVerification(
+            String code,
+            UUID playerUuid,
+            String playerName
+    ) {
         VerificationSession session = getVerification(code);
 
         if (session == null || playerUuid == null || playerName == null) {
@@ -63,12 +76,28 @@ public class VerificationService {
             return false;
         }
 
-        sessions.remove(code);
-        return true;
+        WebAccount account = new WebAccount(
+                playerUuid,
+                playerName,
+                System.currentTimeMillis()
+        );
+
+        if (linkedAccounts.putIfAbsent(playerUuid, account) != null) {
+            return false;
+        }
+
+        return sessions.remove(code, session);
     }
 
-    private String generateCode() {
-        int number = random.nextInt(1_000_000);
-        return String.format("%06d", number);
+    public WebAccount getLinkedAccount(UUID playerUuid) {
+        return linkedAccounts.get(playerUuid);
+    }
+
+    public boolean isLinked(UUID playerUuid) {
+        return linkedAccounts.containsKey(playerUuid);
+    }
+
+    public void unlink(UUID playerUuid) {
+        linkedAccounts.remove(playerUuid);
     }
 }
